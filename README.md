@@ -108,18 +108,15 @@ Only two signals are required:
 ![I2C Bus](images/i2c_bus.png)
 
 ---
+##  I²C Communication Architecture
 
-## I²C Communication Structure
+```mermaid
+flowchart TD
+    FPGA["Tang Nano 4K FPGA<br/>I²C Master"]
+    OLED["SSD1306 OLED Display<br/>I²C Slave"]
 
-```text
-Master Device
-     │
-     │ SDA
-     │ SCL
-     ▼
-+----------------+
-| SSD1306 OLED   |
-+----------------+
+    FPGA -- SDA --> OLED
+    FPGA -- SCL --> OLED
 ```
 
 In this project:
