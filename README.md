@@ -123,30 +123,26 @@ A -- SCL --> B
 ```
 
 ## I²C Transaction Sequence
+## 📡 I²C Transaction Sequence
 
-```text
-START
-  │
-  ▼
-SLAVE ADDRESS
-  │
-  ▼
-ACK
-  │
-  ▼
-CONTROL BYTE
-  │
-  ▼
-ACK
-  │
-  ▼
-DATA BYTE(S)
-  │
-  ▼
-ACK
-  │
-  ▼
-STOP
+```mermaid
+flowchart TD
+    A([START])
+    B[SLAVE ADDRESS]
+    C[ACK]
+    D[CONTROL BYTE]
+    E[ACK]
+    F[DATA BYTE(S)]
+    G[ACK]
+    H([STOP])
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
 ```
 
 ---
