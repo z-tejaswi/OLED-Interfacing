@@ -123,17 +123,25 @@ A -- SCL --> B
 ```
 
 ## I²C Transaction Sequence
-## 📡 I²C Transaction Sequence
+## 📺 SSD1306 OLED I²C Write Sequence
 
 ```mermaid
 flowchart TD
+
     A([START])
-    B[SLAVE ADDRESS]
-    C[ACK]
-    D[CONTROL BYTE]
-    E[ACK]
-    F[DATA BYTE(S)]
-    G[ACK]
+
+    B["OLED Address<br/>0x3C"]
+
+    C["ACK"]
+
+    D["Control Byte<br/>0x00 = Command<br/>0x40 = Data"]
+
+    E["ACK"]
+
+    F["Display Data"]
+
+    G["ACK"]
+
     H([STOP])
 
     A --> B
@@ -144,7 +152,6 @@ flowchart TD
     F --> G
     G --> H
 ```
-
 ---
 
 ## Start Condition
