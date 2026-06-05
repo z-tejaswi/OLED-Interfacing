@@ -77,15 +77,6 @@ The SSD1306 is one of the most popular OLED display controllers used in embedded
 
 ## Display Specifications
 
-| Parameter           | Value           |
-| ------------------- | --------------- |
-| Resolution          | 128 × 64 Pixels |
-| Display Type        | Monochrome OLED |
-| Controller          | SSD1306         |
-| Interface           | I²C             |
-| Address             | 0x3C            |
-| Supply Voltage      | 3.3V - 5V       |
-| Current Consumption | ~20mA           |
 
 The SSD1306 contains internal Graphic Display RAM (GDDRAM) organized into pages and columns, allowing efficient display updates.
 
@@ -94,7 +85,19 @@ The SSD1306 contains internal Graphic Display RAM (GDDRAM) organized into pages 
 # 📡 Understanding the I²C Protocol
 
 ## What is I²C?
+## 📊 SSD1306 Specifications
 
+<p align="center">
+
+<img src="https://img.shields.io/badge/Resolution-128×64-blue?style=for-the-badge">
+<img src="https://img.shields.io/badge/Display-Monochrome_OLED-green?style=for-the-badge">
+<img src="https://img.shields.io/badge/Controller-SSD1306-orange?style=for-the-badge">
+<img src="https://img.shields.io/badge/Interface-I²C-red?style=for-the-badge">
+<img src="https://img.shields.io/badge/Address-0x3C-purple?style=for-the-badge">
+<img src="https://img.shields.io/badge/Voltage-3.3V--5V-yellow?style=for-the-badge">
+<img src="https://img.shields.io/badge/Current-20mA-brightgreen?style=for-the-badge">
+
+</p>
 I²C (Inter-Integrated Circuit) is a two-wire serial communication protocol developed for communication between integrated circuits.
 
 Only two signals are required:
