@@ -158,50 +158,13 @@ Supported operations include:
 The included Bresenham graphics engine is used to efficiently generate geometric primitives directly in hardware.
 
 ---
+### Display Data Flow
+The display rendering process begins within the FPGA's application or user logic, where graphical information such as text, symbols, geometric shapes, or custom bitmap data is generated. This information is passed to the graphics engine, which converts high-level drawing operations into pixel-level data suitable for display. In this project, graphics generation may include character rendering, pixel plotting, and line-drawing operations implemented using dedicated hardware modules.
 
-##  FPGA-Based OLED Communication Architecture
+Once the graphical data has been prepared, it is forwarded to the I²C Master Controller implemented within the Tang Nano 4K FPGA. The I²C controller packages the pixel information into a sequence of data bytes and transmits them over the SDA and SCL lines according to the I²C protocol. Upon reception, the SSD1306 controller stores the incoming bytes within its internal Graphic Display Data RAM (GDDRAM), which serves as a frame buffer for the OLED display.
 
-```mermaid
-flowchart LR
+The SSD1306 continuously reads the contents of GDDRAM and processes the stored pixel information through its internal display driver circuitry. This circuitry generates the required segment and common drive signals that control the OLED matrix. Finally, the processed data reaches the OLED panel, where individual pixels are illuminated according to the contents of GDDRAM, producing the visible text and graphics displayed on the screen. This complete data path—from user logic to graphics generation, I²C transmission, memory storage, display driving, and pixel illumination—forms the foundation of the FPGA-based OLED rendering system implemented in this project.
 
-    APP["Application Logic"]
-
-    GFX["Graphics Engine"]
-
-    I2C["I²C Master Controller"]
-
-    OLED["SSD1306 Controller"]
-
-    PANEL["128×64 OLED Panel"]
-
-    APP --> GFX
-
-    GFX --> I2C
-
-    I2C -- SDA --> OLED
-    I2C -- SCL --> OLED
-
-    OLED --> PANEL
-```
-
----
-
-##  Physical Connections
-
-The SSD1306 communicates with the Tang Nano 4K using only two signal lines.
-
-| Tang Nano 4K | SSD1306 OLED |
-| ------------ | ------------ |
-| Pin 39       | SDA          |
-| Pin 40       | SCL          |
-| 3.3V         | VCC          |
-| GND          | GND          |
-
----
-
-##  Data Flow
-
-The complete communication sequence is shown below:
 
 ```mermaid
 flowchart TD
@@ -224,6 +187,17 @@ flowchart TD
     D --> E
     E --> F
 ```
+---
+
+##  Physical Connections
+The SSD1306 communicates with the Tang Nano 4K using only two signal lines.
+
+| Tang Nano 4K | SSD1306 OLED |
+| ------------ | ------------ |
+| Pin 39       | SDA          |
+| Pin 40       | SCL          |
+| 3.3V         | VCC          |
+| GND          | GND          |
 
 ---
 
@@ -476,14 +450,16 @@ After each transmitted byte, the SSD1306 provides an ACK signal to confirm succe
 
 Once all command or display data bytes have been transmitted, the FPGA generates a STOP condition to release the bus. The STOP condition is produced by transitioning the SDA line from LOW to HIGH while SCL remains HIGH. This event signifies the end of the current transaction and returns the bus to its idle state, allowing future communication cycles to occur.
 
-In this project, the complete communication sequence is implemented entirely in Verilog HDL within the Tang Nano 4K FPGA. Dedicated finite state machines (FSMs) generate the required START and STOP conditions, manage clock timing, control SDA line direction, perform acknowledgment detection, and coordinate the transmission of SSD1306 initialization commands and display data. By implementing the protocol directly in programmable logic rather than software, the design achieves deterministic timing behavior, precise protocol compliance, and efficient hardware-level control over the OLED display subsystem.
 
 ---
 
 ## 🔧 SSD1306 Initialization Sequence
 
-Before any graphics can be displayed, the controller must be configured using command bytes.
+Before the SSD1306 OLED display can render text, graphics, or pixel data, it must first undergo a carefully defined initialization process. Upon power-up, the display controller enters a default state in which critical operating parameters such as memory addressing mode, multiplex ratio, contrast level, charge pump configuration, and display scanning direction have not yet been configured for the target hardware. To prepare the display for normal operation, the Tang Nano 4K FPGA transmits a sequence of command bytes over the I²C bus that configure the internal registers of the SSD1306 controller.
 
+These initialization commands establish the display's electrical characteristics, memory organization, timing parameters, and pixel mapping behavior. Settings such as the multiplex ratio determine how the OLED rows are driven, while segment remapping and COM scan direction control the orientation of the displayed image. Additional commands enable the internal charge pump circuitry, configure contrast levels, and define the memory addressing mode used when writing graphical data to the display's GDDRAM. Only after this initialization sequence has been successfully completed can the OLED panel correctly interpret display data and illuminate pixels.
+
+The following command sequence is executed by the FPGA during system startup to place the SSD1306 into a fully operational state and prepare it for graphical rendering.
 Typical initialization commands:
 
 ```text
@@ -504,24 +480,7 @@ Typical initialization commands:
 0xA6  Normal Display
 0xAF  Display ON
 ```
-
 ---
-
-##  Why SSD1306 is Popular
-
-* Extremely low power consumption
-* High contrast ratio
-* Wide viewing angle
-* No backlight required
-* Fast refresh rate
-* Integrated graphics memory
-* Simple I²C interface
-* Excellent FPGA compatibility
-
-These characteristics make the SSD1306 an ideal display solution for FPGA, microcontroller, and embedded-system projects.
-
----
-
 #  Understanding the I²C Protocol
 
 ## What is I²C?
