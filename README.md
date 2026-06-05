@@ -761,20 +761,6 @@ FPGA and Embedded Systems Enthusiast
 
 ---
 
-#  Support
-
-If you found this project useful:
-
- Star the repository
-
- Fork the project
-
- Contribute improvements
-
- Share it with others
-
----
-
 ## License
 
 This project is released under the MIT License.
