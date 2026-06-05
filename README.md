@@ -109,22 +109,18 @@ Only two signals are required:
 
 ---
 ##  I²C Communication Architecture
+## 📡 FPGA ↔ OLED Communication
 
 ```mermaid
-flowchart TD
-    FPGA["Tang Nano 4K FPGA<br/>I²C Master"]
-    OLED["SSD1306 OLED Display<br/>I²C Slave"]
+graph LR
 
-    FPGA -- SDA --> OLED
-    FPGA -- SCL --> OLED
+A["Tang Nano 4K FPGA<br>Master Device"]
+
+B["SSD1306 OLED<br>Slave Device"]
+
+A -- SDA --> B
+A -- SCL --> B
 ```
-
-In this project:
-
-* Tang Nano 4K acts as the I²C Master
-* SSD1306 acts as the I²C Slave
-
----
 
 ## I²C Transaction Sequence
 
