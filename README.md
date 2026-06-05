@@ -40,52 +40,496 @@ The design implements a complete I²C Master Controller in Verilog, enabling the
 
 ---
 
-# 🔍 About Tang Nano 4K
+#  About Tang Nano 4K
 
 ![Tang Nano 4K](images/tang_nano_4k.jpg)
 
-The Tang Nano 4K is a compact FPGA development board based on the **Gowin GW1NSR-4C FPGA**. It is widely used for learning digital design, FPGA development, and embedded hardware projects.
+# Tang Nano 4K FPGA Platform
 
-## Key Specifications
+![Tang Nano 4K](images/tang_nano_4k.jpg)
 
-| Specification         | Value           |
-| --------------------- | --------------- |
-| FPGA                  | Gowin GW1NSR-4C |
-| Logic Elements        | ~4608 LUT4      |
-| Embedded RAM          | 288 Kbits       |
-| DSP Blocks            | Available       |
-| PLLs                  | Multiple        |
-| Programming Interface | USB-C           |
-| Operating Voltage     | 3.3V            |
-| Development Tool      | Gowin EDA       |
+The Tang Nano 4K is a compact FPGA development board based on the **Gowin GW1NSR-LV4CQN48PC7/I6 FPGA**. In this project, the board serves as the primary processing unit responsible for generating the I²C protocol, initializing the SSD1306 controller, and transmitting graphical data to the OLED display.
 
-### Why Tang Nano 4K?
-
-* Affordable FPGA board
-* Beginner-friendly
-* Small form factor
-* Excellent for digital design learning
-* Supports Verilog and VHDL
+Unlike microcontroller-based implementations, the communication logic is implemented entirely in **Verilog HDL**, allowing complete hardware-level control over the I²C bus timing and OLED interface.
 
 ---
 
-# 🖥 About SSD1306 OLED Display
+## FPGA Specifications
+
+| Feature           | Specification         |
+| ----------------- | --------------------- |
+| FPGA Device       | GW1NSR-LV4CQN48PC7/I6 |
+| Logic Cells       | ~4608 LUT4            |
+| Embedded SRAM     | 288 Kbits             |
+| PLL Resources     | Multiple PLLs         |
+| DSP Blocks        | Available             |
+| GPIO Pins         | User Configurable     |
+| Development Tool  | Gowin EDA             |
+| HDL Support       | Verilog / VHDL        |
+| Operating Voltage | 3.3V                  |
+
+---
+
+##  Tang Nano 4K Resource Overview
+
+```mermaid
+flowchart TD
+
+    FPGA["GW1NSR-4C FPGA"]
+
+    LUT["4608 LUT4 Logic Cells"]
+
+    RAM["288 Kbit Embedded SRAM"]
+
+    PLL["Clock Management PLLs"]
+
+    IO["GPIO Resources"]
+
+    FPGA --> LUT
+    FPGA --> RAM
+    FPGA --> PLL
+    FPGA --> IO
+```
+
+---
+
+##  Role in This Project
+
+The Tang Nano 4K performs the following functions:
+
+### 1️ I²C Master Generation
+
+The FPGA implements an I²C Master Controller capable of generating:
+
+* START Conditions
+* STOP Conditions
+* Clock Pulses (SCL)
+* Data Transmission (SDA)
+* ACK Detection
+* Bus Timing Control
+
+```mermaid
+flowchart LR
+
+    FPGA["Tang Nano 4K"]
+
+    I2C["I²C Master Logic"]
+
+    OLED["SSD1306 OLED"]
+
+    FPGA --> I2C
+
+    I2C -- SDA --> OLED
+    I2C -- SCL --> OLED
+```
+
+---
+
+### 2️ SSD1306 Initialization
+
+After power-up, the FPGA sends a predefined command sequence to configure the OLED controller.
+
+Example commands:
+
+```text
+0xAE  Display OFF
+0xD5  Set Display Clock
+0xA8  Multiplex Ratio
+0x8D  Charge Pump Enable
+0xAF  Display ON
+```
+
+These commands are stored and transmitted by FPGA logic without requiring a processor core.
+
+---
+
+### 3️ Graphics Processing
+
+The FPGA generates pixel data that is written into the SSD1306 GDDRAM.
+
+Supported operations include:
+
+* Character rendering
+* Pixel plotting
+* Line drawing
+* Frame buffering
+* Bitmap display
+
+The included Bresenham graphics engine is used to efficiently generate geometric primitives directly in hardware.
+
+---
+
+##  FPGA-Based OLED Communication Architecture
+
+```mermaid
+flowchart LR
+
+    APP["Application Logic"]
+
+    GFX["Graphics Engine"]
+
+    I2C["I²C Master Controller"]
+
+    OLED["SSD1306 Controller"]
+
+    PANEL["128×64 OLED Panel"]
+
+    APP --> GFX
+
+    GFX --> I2C
+
+    I2C -- SDA --> OLED
+    I2C -- SCL --> OLED
+
+    OLED --> PANEL
+```
+
+---
+
+##  Physical Connections
+
+The SSD1306 communicates with the Tang Nano 4K using only two signal lines.
+
+| Tang Nano 4K | SSD1306 OLED |
+| ------------ | ------------ |
+| Pin 39       | SDA          |
+| Pin 40       | SCL          |
+| 3.3V         | VCC          |
+| GND          | GND          |
+
+---
+
+##  Data Flow
+
+The complete communication sequence is shown below:
+
+```mermaid
+flowchart TD
+
+    A["User Logic"]
+
+    B["Graphics Generator"]
+
+    C["I²C Master"]
+
+    D["SSD1306 GDDRAM"]
+
+    E["OLED Driver Circuit"]
+
+    F["Display Pixels"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+```
+
+---
+
+##  Clock Generation
+
+The Tang Nano 4K uses its internal clock resources to derive the I²C bus frequency.
+
+Typical configuration:
+
+```text
+System Clock : 27 MHz
+
+↓
+
+Clock Divider
+
+↓
+
+I²C Clock : 100 kHz
+```
+
+This ensures compliance with standard-mode I²C timing requirements.
+
+---
+### Parallel Hardware Execution
+
+The FPGA can simultaneously perform:
+
+* Graphics calculations
+* Memory management
+* I²C communication
+* Display refresh logic
+
+without software interrupts or CPU scheduling.
+
+---
+
+### Deterministic Timing
+
+I²C timing is generated directly by hardware state machines.
+
+Benefits:
+
+* Precise clock generation
+* Reliable ACK detection
+* No software latency
+* Improved protocol compliance
+
+---
+
+### Scalability
+
+The same architecture can be extended to:
+
+* Multiple OLED displays
+* SPI Displays
+* LCD Controllers
+* Sensors
+* EEPROM Devices
+* Complex Graphics Systems
+
+simply by modifying the HDL design.
+
+---
+
+##  Tang Nano 4K as an Embedded Graphics Controller
+
+In this project, the Tang Nano 4K effectively acts as a dedicated graphics controller:
+
+```mermaid
+flowchart TD
+
+    FPGA["Tang Nano 4K FPGA"]
+
+    DISPLAY["SSD1306 OLED"]
+
+    FPGA -->|"I²C Commands"| DISPLAY
+
+    FPGA -->|"Pixel Data"| DISPLAY
+
+    FPGA -->|"Graphics Engine"| DISPLAY
+```
+
+This architecture demonstrates how modern FPGAs can directly interface with display hardware while maintaining complete control over communication timing, graphics generation, and display management.
+
+---
+
+#  About SSD1306 OLED Display
 
 ![SSD1306 OLED](images/ssd1306_oled.jpg)
 
-The SSD1306 is one of the most popular OLED display controllers used in embedded systems. Most modules provide a resolution of **128×64 pixels** and communicate through either SPI or I²C. The display commonly uses I²C address **0x3C**.
+##  SSD1306 OLED Display Controller
 
-## Display Specifications
+![SSD1306 OLED](images/ssd1306_oled.jpg)
 
+The SSD1306 is a highly integrated **CMOS OLED/PLED driver IC** designed for monochrome graphical displays. It integrates display RAM, timing generation circuitry, charge pump circuitry, and display control logic into a single chip, making it one of the most widely used OLED controllers in embedded systems.
 
-The SSD1306 contains internal Graphic Display RAM (GDDRAM) organized into pages and columns, allowing efficient display updates.
+The controller is capable of driving displays with resolutions up to **128 × 64 pixels** and supports both **I²C** and **SPI** communication interfaces.
 
 ---
 
-# 📡 Understanding the I²C Protocol
+## Technical Specifications
+
+| Parameter                | Specification             |
+| ------------------------ | ------------------------- |
+| Controller IC            | SSD1306                   |
+| Display Resolution       | 128 × 64 Pixels           |
+| Color Depth              | 1-bit Monochrome          |
+| Display Technology       | Passive Matrix OLED       |
+| GDDRAM Size              | 1024 Bytes                |
+| Communication Interface  | I²C / SPI                 |
+| I²C Address              | 0x3C or 0x3D              |
+| Operating Voltage        | 3.3V – 5V                 |
+| Display RAM Organization | 8 Pages × 128 Columns     |
+| Internal Oscillator      | Integrated                |
+| Charge Pump              | Integrated                |
+| Refresh Control          | Internal Timing Generator |
+
+---
+
+## Internal Architecture
+
+```mermaid
+flowchart TD
+
+    MCU["Host Controller<br/>Tang Nano 4K"]
+
+    I2C["I²C Interface"]
+
+    CTRL["Command Decoder"]
+
+    RAM["GDDRAM<br/>1024 Bytes"]
+
+    DRIVER["Segment & Common Drivers"]
+
+    OLED["OLED Panel"]
+
+    MCU --> I2C
+    I2C --> CTRL
+    CTRL --> RAM
+    RAM --> DRIVER
+    DRIVER --> OLED
+```
+
+---
+
+##  Graphic Display Data RAM (GDDRAM)
+
+The SSD1306 contains an internal **Graphic Display Data RAM (GDDRAM)** that stores the display contents before they are rendered on the OLED panel.
+
+### Memory Organization
+
+```text
+Page 0  -> 128 Bytes
+Page 1  -> 128 Bytes
+Page 2  -> 128 Bytes
+Page 3  -> 128 Bytes
+Page 4  -> 128 Bytes
+Page 5  -> 128 Bytes
+Page 6  -> 128 Bytes
+Page 7  -> 128 Bytes
+```
+
+Total Memory:
+
+```text
+8 Pages × 128 Bytes = 1024 Bytes
+```
+
+Each byte controls a vertical column of 8 pixels.
+
+---
+
+### Memory Mapping in the SSD1306
+
+The SSD1306 uses a page-oriented memory architecture to manage the display contents. The 128×64 pixel screen is divided into eight pages, each containing 128 columns. Since each byte controls a vertical group of eight pixels, the complete display requires 128 × 8 = 1024 bytes of memory. During operation, the Tang Nano 4K FPGA transmits command and data bytes through the I²C interface to update specific locations within the SSD1306 GDDRAM. The display controller then reads the stored data and drives the corresponding segment and common outputs to illuminate the OLED pixels. Understanding this memory organization is essential when implementing custom graphics engines, frame buffers, text rendering, or pixel-level drawing algorithms in Verilog.
+
+---
+
+##  Internal Functional Blocks
+
+### Segment Driver
+
+Generates horizontal pixel data.
+
+```text
+SEG0 → SEG127
+```
+
+A total of 128 segment outputs drive the display columns.
+
+---
+
+### Common Driver
+
+Generates row scanning signals.
+
+```text
+COM0 → COM63
+```
+
+A total of 64 common outputs drive the display rows.
+
+---
+
+### Charge Pump Circuit
+
+The SSD1306 contains an internal charge pump that generates the higher voltages required by OLED pixels.
+
+Benefits:
+
+* No external OLED bias supply required
+* Reduced component count
+* Simplified PCB design
+
+---
+
+### Timing Generator
+
+The internal timing generator handles:
+
+* Row scanning
+* Display refresh
+* Frame synchronization
+* Oscillator management
+
+This significantly reduces processing overhead on the host FPGA.
+
+---
+
+## 📡 Communication with Tang Nano 4K
+
+In this project the Tang Nano 4K operates as the I²C Master while the SSD1306 acts as the I²C Slave.
+
+Communication sequence:
+
+```mermaid
+flowchart TD
+
+    A([START])
+
+    B["Address 0x3C"]
+
+    C["ACK"]
+
+    D["Control Byte"]
+
+    E["ACK"]
+
+    F["Command/Data"]
+
+    G["ACK"]
+
+    H([STOP])
+
+    A --> B --> C --> D --> E --> F --> G --> H
+```
+
+---
+
+## 🔧 SSD1306 Initialization Sequence
+
+Before any graphics can be displayed, the controller must be configured using command bytes.
+
+Typical initialization commands:
+
+```text
+0xAE  Display OFF
+0xD5  Set Clock Divide Ratio
+0xA8  Set Multiplex Ratio
+0xD3  Set Display Offset
+0x40  Set Start Line
+0x8D  Charge Pump Enable
+0x20  Memory Addressing Mode
+0xA1  Segment Remap
+0xC8  COM Output Scan Direction
+0xDA  COM Pins Hardware Config
+0x81  Contrast Control
+0xD9  Pre-Charge Period
+0xDB  VCOMH Deselect Level
+0xA4  Resume RAM Display
+0xA6  Normal Display
+0xAF  Display ON
+```
+
+---
+
+##  Why SSD1306 is Popular
+
+* Extremely low power consumption
+* High contrast ratio
+* Wide viewing angle
+* No backlight required
+* Fast refresh rate
+* Integrated graphics memory
+* Simple I²C interface
+* Excellent FPGA compatibility
+
+These characteristics make the SSD1306 an ideal display solution for FPGA, microcontroller, and embedded-system projects.
+
+---
+
+#  Understanding the I²C Protocol
 
 ## What is I²C?
-## 📊 SSD1306 Specifications
+##  SSD1306 Specifications
 
 <p align="center">
 
@@ -121,9 +565,7 @@ B["SSD1306 OLED<br>Slave Device"]
 A -- SDA --> B
 A -- SCL --> B
 ```
-
-## I²C Transaction Sequence
-## 📺 SSD1306 OLED I²C Write Sequence
+##  SSD1306 OLED I²C Write Sequence
 
 ```mermaid
 flowchart TD
@@ -153,26 +595,37 @@ flowchart TD
     G --> H
 ```
 ---
+##  I²C START Condition
 
-## Start Condition
+```mermaid
+sequenceDiagram
+    participant Master
+    participant Bus
 
-The master initiates communication by pulling SDA low while SCL remains high.
+    Note over Master,Bus: SCL remains HIGH
 
-```text
-SCL ─────────────
-SDA ──────\______
+    Master->>Bus: Pull SDA LOW
+
+    Note over Master,Bus: START Condition
 ```
+Communication ends when SDA transitions low while SCL is high.
 
----
+##  I²C STOP Condition
 
-## Stop Condition
+```mermaid
+flowchart TD
 
-Communication ends when SDA transitions high while SCL is high.
+    A["Data Transfer Complete"]
 
-```text
-SCL ─────────────
-SDA _____/───────
+    B["SCL = HIGH"]
+
+    C["Master Releases SDA HIGH"]
+
+    D["STOP Condition"]
+
+    A --> B --> C --> D
 ```
+Communication ends when SDA transitions low while SCL is high.
 
 ---
 
@@ -197,7 +650,7 @@ ACK Bit
 
 ---
 
-# 🔗 OLED and FPGA Communication
+# OLED and FPGA Communication
 
 The SSD1306 OLED receives commands and display data through the I²C bus.
 
@@ -253,47 +706,50 @@ The SSD1306 internally stores display information in a 1024-byte GDDRAM buffer.
 
 ---
 
-# 📐 System Architecture
+##  Overall System Architecture
 
-```text
-+--------------------+
-| Tang Nano 4K FPGA  |
-|                    |
-|  I2C Master        |
-+---------+----------+
-          |
-          | SDA
-          |
-          | SCL
-          |
-+---------v----------+
-| SSD1306 OLED       |
-| Display Controller |
-+--------------------+
+```mermaid
+flowchart LR
+
+    USER[" User Logic"]
+
+    I2C[" I²C Master<br/>Verilog Module"]
+
+    OLED[" SSD1306 OLED<br/>Controller"]
+
+    DISPLAY["128 × 64 OLED Panel"]
+
+    USER --> I2C
+
+    I2C -- SDA --> OLED
+    I2C -- SCL --> OLED
+
+    OLED --> DISPLAY
 ```
 
 ---
 
 # Project Structure
 
-```text
-Project/
-│
-├── top.v
-├── i2c.v
-├── i2c_api.v
-├── gfx_unit_bresenham.v
-├── README.md
-│
-└── images/
-    ├── project_banner.png
-    ├── tang_nano_4k.jpg
-    ├── ssd1306_oled.jpg
-    ├── oled_demo.jpg
-    ├── i2c_bus.png
-    └── i2c_timing.png
-```
 
+The project is organized into a modular architecture to separate hardware control, communication logic, graphics generation, and documentation. The main FPGA design is contained within `top.v`, which serves as the top-level module and integrates all submodules responsible for OLED communication and display control. The `i2c.v` file implements the low-level I²C protocol engine, handling SDA and SCL signaling, START and STOP conditions, data transmission, and acknowledgment detection. Building upon this, `i2c_api.v` provides a higher-level interface for sending commands and display data to the SSD1306 controller, simplifying communication between the application logic and the I²C hardware layer.
+
+Graphics generation is handled by `gfx_unit_bresenham.v`, which implements the Bresenham line-drawing algorithm in hardware, enabling efficient rendering of geometric primitives directly on the OLED display. The project documentation is maintained in `README.md`, which contains detailed explanations of the hardware architecture, communication protocol, and implementation details.
+
+An `images` directory is included to store visual resources used throughout the documentation. These assets include photographs of the Tang Nano 4K development board and SSD1306 OLED module, project demonstration images, I²C bus diagrams, timing waveforms, and other illustrations that help explain the system architecture and communication flow.
+
+This modular organization improves code maintainability, readability, and scalability, making it easier to extend the design with additional graphics capabilities, display drivers, or communication interfaces in future developments.
+
+###  Source Files Overview
+
+- **top.v** – Top-level FPGA module responsible for integrating all system components.
+- **i2c.v** – Low-level I²C Master implementation for SDA/SCL bus control.
+- **i2c_api.v** – High-level SSD1306 communication interface and command handler.
+- **gfx_unit_bresenham.v** – Hardware implementation of the Bresenham line-drawing algorithm.
+- **README.md** – Project documentation and usage guide.
+- **images/** – Documentation assets including diagrams, photographs, and project demonstrations.
+
+The design follows a layered architecture in which application logic communicates with the SSD1306 display through dedicated graphics and I²C abstraction layers, improving modularity and simplifying future enhancements.
 ---
 
 #  Pin Connections
