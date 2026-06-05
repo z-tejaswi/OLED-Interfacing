@@ -429,6 +429,9 @@ This significantly reduces processing overhead on the host FPGA.
 ---
 
 ## 📡 Communication with Tang Nano 4K
+<p align="center">
+  <img src="images/tang nano4k.jpg" width="900">
+</p>
 
 In this project the Tang Nano 4K operates as the I²C Master while the SSD1306 acts as the I²C Slave.
 
