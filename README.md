@@ -1,7 +1,5 @@
 # FPGA-Based SSD1306 OLED Interface Using I²C on Tang Nano 4K
 
-![Project Banner](images/project_banner.jpg)
-
 ## Overview
 
 This project demonstrates how to interface a 0.96" SSD1306 OLED display with the Tang Nano 4K FPGA using a custom I²C Master written entirely in Verilog HDL.
@@ -63,7 +61,7 @@ The Tang Nano 4K is built around the Gowin GW1NSR-LV4CQN48 FPGA and acts as the 
 
 ## SSD1306 OLED Display
 
-![SSD1306 OLED](images/ssd1306_oled.jpg)
+![SSD1306 OLED](images/ssd1306.webp)
 
 The SSD1306 is one of the most commonly used monochrome OLED controllers. It contains internal display memory, timing circuitry, and OLED driver logic, allowing direct control through I²C.
 
