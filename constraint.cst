@@ -1,0 +1,14 @@
+// Onboard Clock for Tang Nano 4K
+IO_LOC "clk" 45;
+IO_PORT "clk" IO_TYPE=LVCMOS33;
+
+// OLED Display Connections 
+IO_LOC "SCL" 39;
+IO_PORT "SCL" IO_TYPE=LVCMOS33;
+
+IO_LOC "SDA" 40;
+IO_PORT "SDA" IO_TYPE=LVCMOS33;
+
+// Optional Monitoring Pin
+IO_LOC "FPS" 10;
+IO_PORT "FPS" IO_TYPE=LVCMOS33;
