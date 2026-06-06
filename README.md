@@ -1,6 +1,6 @@
 # FPGA-Based SSD1306 OLED Interface Using I²C on Tang Nano 4K
 
-![Project Banner](images/project_banner.png)
+![Project Banner](images/project_banner.jpg)
 
 ## Overview
 
