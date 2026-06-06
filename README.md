@@ -23,7 +23,7 @@ The design implements OLED initialization, command transmission, display data tr
 
 ## Project Demonstration
 image will be added soon
-![OLED Demo](images/oled_demo.jpg)
+![OLED Demo](images/oled_demo.png)
 
 ---
 
