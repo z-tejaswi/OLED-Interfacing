@@ -14,7 +14,6 @@ The design implements OLED initialization, command transmission, display data tr
 - SSD1306 initialization sequence
 - Hardware-driven OLED control
 - Text and graphics rendering support
-- Bresenham line-drawing engine
 - Modular and reusable architecture
 - Compatible with Tang Nano 4K FPGA
 - Educational FPGA communication project
